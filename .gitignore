@@ -50,3 +50,8 @@ nohup.out
 
 # UV Python package manager
 .uv/
+
+# Documentation files (project-specific, not for version control)
+AGENTS.md
+GRADIENT_FIX.md
+GRADIENT_INTEGRATION.md
