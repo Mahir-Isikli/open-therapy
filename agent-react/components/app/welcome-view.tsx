@@ -21,11 +21,15 @@ function WelcomeImage() {
 interface WelcomeViewProps {
   startButtonText: string;
   onStartCall: () => void;
+  onOpenVoiceCloning?: () => void;
+  hasCustomVoice?: boolean;
 }
 
 export const WelcomeView = ({
   startButtonText,
   onStartCall,
+  onOpenVoiceCloning,
+  hasCustomVoice,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
   return (
@@ -40,6 +44,19 @@ export const WelcomeView = ({
         <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
           {startButtonText}
         </Button>
+
+        {onOpenVoiceCloning && (
+          <div className="mt-4">
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={onOpenVoiceCloning}
+              className="font-mono"
+            >
+              {hasCustomVoice ? '✓ Custom Voice Set' : 'Clone Your Voice'}
+            </Button>
+          </div>
+        )}
       </section>
 
       <div className="fixed bottom-5 left-0 flex w-full items-center justify-center">

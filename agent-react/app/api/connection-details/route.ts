@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { AccessToken, type AccessTokenOptions, type VideoGrant } from 'livekit-server-sdk';
-import { RoomConfiguration } from '@livekit/protocol';
+import { RoomConfiguration, RoomAgentDispatch } from '@livekit/protocol';
 
 type ConnectionDetails = {
   serverUrl: string;
@@ -32,6 +32,9 @@ export async function POST(req: Request) {
     // Parse agent configuration from request body
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
+    const voiceId: string | undefined = body?.voice_id;
+    
+    console.log('[CONNECTION] Received request with voiceId:', voiceId);
 
     // Generate participant token
     const participantName = 'user';
@@ -41,8 +44,39 @@ export async function POST(req: Request) {
     const participantToken = await createParticipantToken(
       { identity: participantIdentity, name: participantName },
       roomName,
-      agentName
+      agentName,
+      voiceId
     );
+
+    // If we have a voice ID, create the room with metadata first
+    if (voiceId) {
+      console.log('[CONNECTION] Creating room with voice_id metadata:', voiceId);
+      try {
+        const { RoomServiceClient } = await import('livekit-server-sdk');
+        const roomService = new RoomServiceClient(LIVEKIT_URL, API_KEY, API_SECRET);
+        
+        // Create the room with metadata included
+        await roomService.createRoom({
+          name: roomName,
+          emptyTimeout: 60 * 5, // 5 minutes
+          metadata: JSON.stringify({ voice_id: voiceId }),
+        });
+        console.log('[CONNECTION] Room created successfully with metadata');
+      } catch (error: any) {
+        // Room might already exist, try to update metadata
+        if (error?.code === 'already_exists' || error?.status === 409) {
+          console.log('[CONNECTION] Room exists, updating metadata...');
+          try {
+            await roomService.updateRoomMetadata(roomName, JSON.stringify({ voice_id: voiceId }));
+            console.log('[CONNECTION] Room metadata updated successfully');
+          } catch (updateError) {
+            console.error('[CONNECTION] Failed to update room metadata:', updateError);
+          }
+        } else {
+          console.error('[CONNECTION] Failed to create room:', error);
+        }
+      }
+    }
 
     // Return connection details
     const data: ConnectionDetails = {
@@ -66,7 +100,8 @@ export async function POST(req: Request) {
 function createParticipantToken(
   userInfo: AccessTokenOptions,
   roomName: string,
-  agentName?: string
+  agentName?: string,
+  voiceId?: string
 ): Promise<string> {
   const at = new AccessToken(API_KEY, API_SECRET, {
     ...userInfo,
@@ -82,9 +117,25 @@ function createParticipantToken(
   at.addGrant(grant);
 
   if (agentName) {
-    at.roomConfig = new RoomConfiguration({
-      agents: [{ agentName }],
+    // Use RoomAgentDispatch to properly pass metadata to the agent
+    const agentDispatch = new RoomAgentDispatch({
+      agentName: agentName,
+      metadata: voiceId ? JSON.stringify({ voice_id: voiceId }) : undefined,
     });
+    
+    if (voiceId) {
+      console.log('[TOKEN] Setting agent dispatch metadata:', agentDispatch.metadata);
+    }
+    
+    at.roomConfig = new RoomConfiguration({
+      agents: [agentDispatch],
+    });
+  }
+
+  // Also set participant metadata as backup
+  if (voiceId) {
+    at.metadata = JSON.stringify({ voice_id: voiceId });
+    console.log('[TOKEN] Setting participant metadata:', at.metadata);
   }
 
   return at.toJwt();

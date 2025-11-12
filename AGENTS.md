@@ -75,7 +75,7 @@ All API keys are stored in `.env.local` files (excluded from Git):
 - `LIVEKIT_URL` - LiveKit Cloud WebSocket URL
 - `GROQ_API_KEY` - Groq LLM access
 - `DEEPGRAM_API_KEY` - Deepgram STT access
-- `CARTESIA_API_KEY` - Cartesia TTS access
+- `CARTESIA_API_KEY` - Cartesia TTS and voice cloning access (required in both Python and React .env.local)
 
 ## 🛠️ Common Tasks
 
@@ -107,19 +107,38 @@ uv run agent.py download-files
 User Browser (localhost:3001)
     ↓
 React Frontend (agent-react)
+    ├── Voice Cloning UI (optional)
+    └── Audio Recording Component
     ↓
 LiveKit Cloud (WebSocket)
     ↓
 Python Agent (agent-python)
     ├── Groq (Kimi K2) - Reasoning
     ├── Deepgram - Speech Recognition
-    └── Cartesia - Voice Synthesis
+    └── Cartesia - Voice Synthesis (with optional custom voice)
 ```
+
+## 🎤 Voice Cloning Feature
+
+Users can clone their own voice for a personalized agent experience:
+
+1. Click "Clone Your Voice" button on the welcome screen
+2. Record 3-10 seconds of clear audio
+3. Voice is cloned via Cartesia API (instant voice cloning)
+4. Agent uses the custom voice for all responses
+
+**Best Practices for Recording:**
+- Quiet environment with minimal background noise
+- Clear speech without long pauses
+- 3-10 seconds of audio (10 second max enforced)
+- Speak naturally in your normal voice
 
 ## 📚 Key Files
 
-- `agent-python/agent.py` - Agent logic and model configuration
-- `agent-react/app/api/connection-details/route.ts` - Connection token generation
+- `agent-python/agent.py` - Agent logic, model configuration, and voice cloning function
+- `agent-react/app/api/connection-details/route.ts` - Connection token generation with voice ID support
+- `agent-react/app/api/clone-voice/route.ts` - Voice cloning API endpoint
+- `agent-react/components/app/voice-cloning-modal.tsx` - Voice recording and cloning UI
 - `agent-react/components/app/app.tsx` - Main UI component
 - `.gitignore` - Protects sensitive files from Git
 
