@@ -16,10 +16,12 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [voiceName, setVoiceName] = useState('');
+  const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     return () => {
@@ -80,6 +82,29 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
       setIsRecording(false);
       if (timerRef.current) clearInterval(timerRef.current);
     }
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/webm', 'audio/ogg', 'audio/m4a'];
+    if (!validTypes.includes(file.type) && !file.name.match(/\.(mp3|wav|webm|ogg|m4a)$/i)) {
+      setError('Please upload a valid audio file (MP3, WAV, WEBM, OGG, or M4A)');
+      return;
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
+    setAudioBlob(file);
+    setUploadedFileName(file.name);
+    setRecordingTime(0);
+    setError(null);
   };
 
   const handleUpload = async () => {
@@ -163,7 +188,12 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
           {audioBlob && !isRecording && (
             <div className="text-foreground flex items-center gap-2 text-sm font-mono">
               <span className="text-primary">✓</span>
-              <span>Recording complete ({recordingTime}s)</span>
+              <span>
+                {uploadedFileName 
+                  ? `File uploaded: ${uploadedFileName.substring(0, 20)}${uploadedFileName.length > 20 ? '...' : ''}`
+                  : `Recording complete (${recordingTime}s)`
+                }
+              </span>
             </div>
           )}
         </div>
@@ -176,9 +206,32 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
         {/* Action Buttons */}
         <div className="flex flex-col gap-2">
           {!isRecording && !audioBlob && (
-            <Button onClick={startRecording} variant="primary" size="default" disabled={isUploading} className="w-full font-mono text-[11px]">
-              Start Recording
-            </Button>
+            <>
+              <Button onClick={startRecording} variant="primary" size="default" disabled={isUploading} className="w-full font-mono text-[11px]">
+                Start Recording
+              </Button>
+              <div className="flex items-center gap-2 my-1">
+                <div className="flex-1 h-px bg-foreground/10"></div>
+                <span className="text-foreground/40 text-[10px] font-mono uppercase">or</span>
+                <div className="flex-1 h-px bg-foreground/10"></div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/*,.mp3,.wav,.webm,.ogg,.m4a"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outline"
+                size="default"
+                disabled={isUploading}
+                className="w-full font-mono text-[11px]"
+              >
+                Upload Audio File
+              </Button>
+            </>
           )}
 
           {isRecording && (
@@ -198,15 +251,31 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
               >
                 {isUploading ? 'Cloning...' : 'Clone Voice'}
               </Button>
-              <Button
-                onClick={startRecording}
-                variant="outline"
-                size="sm"
-                disabled={isUploading}
-                className="w-full font-mono text-[10px]"
-              >
-                Re-record
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={startRecording}
+                  variant="outline"
+                  size="sm"
+                  disabled={isUploading}
+                  className="flex-1 font-mono text-[10px]"
+                >
+                  Re-record
+                </Button>
+                <Button
+                  onClick={() => {
+                    setAudioBlob(null);
+                    setUploadedFileName(null);
+                    setRecordingTime(0);
+                    if (fileInputRef.current) fileInputRef.current.value = '';
+                  }}
+                  variant="outline"
+                  size="sm"
+                  disabled={isUploading}
+                  className="flex-1 font-mono text-[10px]"
+                >
+                  Clear
+                </Button>
+              </div>
             </>
           )}
           
