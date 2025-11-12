@@ -1,6 +1,6 @@
 # Open Therapy
 
-Making therapy accessible and affordable through AI voice technology.
+Tough conversations are... tough to have. Voice agents offer a way to have therapy-like conversations or roleplay with real voices and deal with that difficult talk you've been pushing off for way too long.
 
 ## What is this?
 
