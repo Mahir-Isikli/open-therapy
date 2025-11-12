@@ -1,0 +1,52 @@
+# Environment variables (contains API keys)
+.env
+.env.local
+.env*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node.js / React
+node_modules/
+.next/
+out/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# LiveKit / Agent logs
+*.log
+agent.log
+agent-debug.log
+agent-react.log
+agent-node.log
+nohup.out
+
+# Hugging Face cache
+.cache/
+
+# UV Python package manager
+.uv/
