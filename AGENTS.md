@@ -11,6 +11,8 @@ AI-tinkerers-Nov/
 ├── agent-react/         # React frontend (UI)
 │   ├── app/             # Next.js app routes
 │   ├── components/      # UI components
+│   ├── public/
+│   │   └── gradient/    # Animated gradient background (WebGL)
 │   ├── .env.local       # API keys (not in Git)
 │   └── node_modules/    # Dependencies
 ├── .env                 # Master API keys file
@@ -22,6 +24,7 @@ AI-tinkerers-Nov/
 **LLM:** Groq - Kimi K2 Instruct (`moonshotai/kimi-k2-instruct`)
 **STT:** Deepgram Nova-3
 **TTS:** Cartesia Sonic-3 (Voice: Jacqueline)
+**Memory:** Mem0 (Semantic memory with RAG)
 
 ## 🚀 Starting the Apps
 
@@ -76,6 +79,7 @@ All API keys are stored in `.env.local` files (excluded from Git):
 - `GROQ_API_KEY` - Groq LLM access
 - `DEEPGRAM_API_KEY` - Deepgram STT access
 - `CARTESIA_API_KEY` - Cartesia TTS and voice cloning access (required in both Python and React .env.local)
+- `MEM0_API_KEY` - Mem0 semantic memory and RAG access
 
 ## 🛠️ Common Tasks
 
@@ -115,7 +119,8 @@ LiveKit Cloud (WebSocket)
 Python Agent (agent-python)
     ├── Groq (Kimi K2) - Reasoning
     ├── Deepgram - Speech Recognition
-    └── Cartesia - Voice Synthesis (with optional custom voice)
+    ├── Cartesia - Voice Synthesis (with optional custom voice)
+    └── Mem0 - Semantic Memory & RAG (stores/retrieves conversation context)
 ```
 
 ## 🎤 Voice Cloning Feature
@@ -133,13 +138,51 @@ Users can clone their own voice for a personalized agent experience:
 - 3-10 seconds of audio (10 second max enforced)
 - Speak naturally in your normal voice
 
+## 🧠 Memory System (Mem0)
+
+The agent uses Mem0 for semantic memory and RAG (Retrieval Augmented Generation):
+
+**How it works:**
+1. Every user message is stored in Mem0 with semantic embedding
+2. Before responding, agent searches Mem0 for relevant past context
+3. Retrieved memories are injected into the conversation as context
+4. Agent uses this context to provide personalized, context-aware responses
+
+**Memory User ID:** `livekit-mem0` (shared across all sessions)
+
+**Implementation:** Follows LiveKit's official Mem0 integration pattern with global client initialization
+
+**Features:**
+- Automatic conversation storage
+- Semantic search for relevant past interactions
+- Natural context injection (agent doesn't explicitly mention memory)
+- Persistent across sessions
+
+## 🎨 Animated Gradient Background
+
+The React frontend features a WebGL-based animated gradient background (based on GradientGen):
+
+**Features:**
+- GPU-accelerated WebGL rendering
+- Therapeutic preset (calm blue tones, slow movement)
+- Automatically responsive to screen size
+- Positioned behind all UI elements
+
+**Files:**
+- `public/gradient/gradient-engine.js` - Main WebGL engine (no UI controls)
+- `public/gradient/README.md` - Customization guide
+
+**Customization:**
+To change colors, speed, or patterns, edit `gradient-engine.js` and modify the `shaderParams` object. See the README for preset examples (ocean, sunset, forest, etc.).
+
 ## 📚 Key Files
 
-- `agent-python/agent.py` - Agent logic, model configuration, and voice cloning function
+- `agent-python/agent.py` - Agent logic with MemoryEnabledAgent class, model configuration, and voice cloning
 - `agent-react/app/api/connection-details/route.ts` - Connection token generation with voice ID support
 - `agent-react/app/api/clone-voice/route.ts` - Voice cloning API endpoint
 - `agent-react/components/app/voice-cloning-modal.tsx` - Voice recording and cloning UI
 - `agent-react/components/app/app.tsx` - Main UI component
+- `agent-react/public/gradient/` - Animated gradient background engine
 - `.gitignore` - Protects sensitive files from Git
 
 ## ⚡ Performance Notes

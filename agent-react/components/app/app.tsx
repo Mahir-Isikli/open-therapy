@@ -13,7 +13,7 @@ interface AppProps {
 export function App({ appConfig }: AppProps) {
   return (
     <SessionProvider appConfig={appConfig}>
-      <main className="grid h-svh grid-cols-1 place-content-center">
+      <main className="grid h-svh grid-cols-1 place-content-center bg-transparent">
         <ViewController />
       </main>
       <StartAudio label="Start Audio" />

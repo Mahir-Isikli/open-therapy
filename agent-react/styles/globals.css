@@ -117,8 +117,25 @@
   * {
     @apply border-foreground/20 outline-ring/50;
   }
+  
+  html {
+    background: #000;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: transparent;
+  }
+  
+  /* Ensure gradient canvas stays behind everything */
+  #gradient-display-canvas {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
   }
 }
 
