@@ -123,8 +123,8 @@ export function TileLayout({ chatOpen }: TileLayoutProps) {
                     delay: animationDelay,
                   }}
                   className={cn(
-                    'aspect-square h-[90px] rounded-md border border-transparent transition-[border,drop-shadow]',
-                    chatOpen && 'border-input/50 drop-shadow-lg/10 delay-200'
+                    'aspect-square h-[90px] rounded-md transition-[drop-shadow]',
+                    chatOpen && 'drop-shadow-lg/10 delay-200'
                   )}
                 >
                   <BarVisualizer

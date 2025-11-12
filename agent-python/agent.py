@@ -4,7 +4,7 @@ import requests
 import logging
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, ChatMessage
+from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, ChatMessage, mcp, BackgroundAudioPlayer, AudioConfig
 from livekit.plugins import groq, deepgram, cartesia, noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from mem0 import AsyncMemoryClient
@@ -21,6 +21,18 @@ logger = logging.getLogger("memory_voice_agent")
 # User ID for RAG data in Mem0
 RAG_USER_ID = "livekit-mem0"
 mem0_client = AsyncMemoryClient()
+
+
+def load_system_prompt() -> str:
+    """Load the system prompt from external file."""
+    try:
+        prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
+        with open(prompt_path, "r") as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        logger.warning("system_prompt.txt not found, using default prompt")
+        return """You are a helpful voice AI assistant. Your responses are concise and conversational, 
+        without any complex formatting, emojis, or special characters."""
 
 
 def clone_voice(audio_file_path: str, name: str, language: str = "en", mode: str = "similarity") -> str:
@@ -67,15 +79,10 @@ class MemoryEnabledAgent(Agent):
     """
     def __init__(self) -> None:
         super().__init__(
-            instructions="""You are a helpful voice AI assistant with memory capabilities.
-            You can remember past conversations and use that context to provide better assistance.
-            You eagerly assist users with their questions by providing information from your extensive knowledge.
-            Your responses are concise, to the point, and without any complex formatting or punctuation including emojis, asterisks, or other symbols.
-            You are curious, friendly, and have a sense of humor.
-            When you recall information from past conversations, use it naturally without explicitly mentioning your memory.""",
+            instructions=load_system_prompt(),
         )
         self._seen_results = set()  # Track previously seen memory result IDs
-        logger.info(f"MemoryEnabledAgent initialized. Using user_id: {RAG_USER_ID}")
+        logger.info(f"MemoryEnabledAgent initialized with system prompt from file. Using user_id: {RAG_USER_ID}")
 
     async def on_enter(self):
         """Called when the agent enters the conversation."""
@@ -148,6 +155,15 @@ async def entrypoint(ctx: agents.JobContext):
     
     print(f"[FINAL] Voice ID: {voice_id}")
     
+    # Get MCP server URL from environment
+    mcp_server_url = os.getenv("MCP_SERVER_URL")
+    mcp_servers = []
+    if mcp_server_url:
+        print(f"✓ MCP server configured: {mcp_server_url}")
+        mcp_servers = [mcp.MCPServerHTTP(mcp_server_url)]
+    else:
+        print("⚠ No MCP server URL found in environment")
+    
     # Set up a voice AI pipeline using Groq Kimi K2, Deepgram STT, and Cartesia TTS
     session = AgentSession(
         # Speech-to-text using Deepgram Nova-3 for high-quality transcription
@@ -176,6 +192,9 @@ async def entrypoint(ctx: agents.JobContext):
         # See more at https://docs.livekit.io/agents/build/turns
         vad=silero.VAD.load(),
         turn_detection=MultilingualModel(),
+        
+        # MCP servers for external tool access
+        mcp_servers=mcp_servers,
     )
 
     await session.start(
@@ -186,6 +205,14 @@ async def entrypoint(ctx: agents.JobContext):
             noise_cancellation=noise_cancellation.BVC(),
         ),
     )
+    
+    # Set up background audio with thinking sound for tool calls
+    thinking_sound_path = os.path.join(os.path.dirname(__file__), "thinking-sound.mp3")
+    background_audio = BackgroundAudioPlayer(
+        thinking_sound=AudioConfig(thinking_sound_path, volume=0.6),
+    )
+    await background_audio.start(room=ctx.room, agent_session=session)
+    print("✓ Thinking sound enabled for tool calls")
 
 
 if __name__ == "__main__":

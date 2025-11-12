@@ -122,17 +122,17 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-background border-border w-full max-w-md rounded-lg border p-6 shadow-lg">
-        <h2 className="text-foreground mb-4 text-xl font-semibold">Clone Your Voice</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-background/95 backdrop-blur-md w-full max-w-lg rounded-2xl p-8 shadow-2xl">
+        <h2 className="text-foreground mb-2 text-2xl font-semibold">Clone Your Voice</h2>
 
-        <p className="text-muted-foreground mb-4 text-sm">
+        <p className="text-muted-foreground mb-8 leading-6">
           Record 3-10 seconds of clear audio in a quiet environment for best results.
         </p>
 
         {/* Voice Name Input */}
-        <div className="mb-4">
-          <label htmlFor="voiceName" className="text-foreground mb-2 block text-sm font-medium">
+        <div className="mb-6">
+          <label htmlFor="voiceName" className="text-foreground mb-2 block font-medium">
             Voice Name
           </label>
           <input
@@ -141,68 +141,70 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
             value={voiceName}
             onChange={(e) => setVoiceName(e.target.value)}
             placeholder="My Custom Voice"
-            className="bg-input border-border text-foreground placeholder:text-muted-foreground w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="bg-muted/50 border-input/50 text-foreground placeholder:text-muted-foreground w-full rounded-lg border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50"
             disabled={isUploading}
           />
         </div>
 
-        {/* Recording Controls */}
-        <div className="mb-4 flex flex-col items-center space-y-3">
+        {/* Recording Status */}
+        <div className="mb-6 flex flex-col items-center space-y-4">
           {isRecording && (
-            <div className="text-foreground text-2xl font-mono">
+            <div className="text-foreground text-3xl font-mono font-bold">
               {recordingTime}s / 10s
             </div>
           )}
 
           {audioBlob && !isRecording && (
-            <div className="text-muted-foreground flex items-center space-x-2 text-sm">
-              <span>✓ Recording complete ({recordingTime}s)</span>
+            <div className="text-foreground flex items-center space-x-2">
+              <span className="text-lg">✓ Recording complete ({recordingTime}s)</span>
             </div>
           )}
-
-          <div className="flex space-x-3">
-            {!isRecording && !audioBlob && (
-              <Button onClick={startRecording} variant="primary" size="md" disabled={isUploading}>
-                Start Recording
-              </Button>
-            )}
-
-            {isRecording && (
-              <Button onClick={stopRecording} variant="destructive" size="md">
-                Stop Recording
-              </Button>
-            )}
-
-            {audioBlob && !isRecording && (
-              <Button
-                onClick={startRecording}
-                variant="secondary"
-                size="md"
-                disabled={isUploading}
-              >
-                Re-record
-              </Button>
-            )}
-          </div>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 rounded-md bg-red-500/10 p-3 text-sm text-red-500">{error}</div>
+          <div className="mb-6 rounded-lg bg-red-500/10 p-4 text-red-500">{error}</div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex justify-end space-x-3">
-          <Button onClick={onClose} variant="secondary" size="md" disabled={isUploading}>
-            Cancel
-          </Button>
-          <Button
-            onClick={handleUpload}
-            variant="primary"
-            size="md"
-            disabled={!audioBlob || !voiceName.trim() || isUploading}
-          >
-            {isUploading ? 'Cloning...' : 'Clone Voice'}
+        <div className="flex flex-col space-y-3">
+          {!isRecording && !audioBlob && (
+            <Button onClick={startRecording} variant="primary" size="lg" disabled={isUploading} className="w-full font-mono">
+              START RECORDING
+            </Button>
+          )}
+
+          {isRecording && (
+            <Button onClick={stopRecording} variant="destructive" size="lg" className="w-full font-mono">
+              STOP RECORDING
+            </Button>
+          )}
+
+          {audioBlob && !isRecording && (
+            <>
+              <Button
+                onClick={handleUpload}
+                variant="primary"
+                size="lg"
+                disabled={!voiceName.trim() || isUploading}
+                className="w-full font-mono"
+              >
+                {isUploading ? 'CLONING...' : 'CLONE VOICE'}
+              </Button>
+              <Button
+                onClick={startRecording}
+                variant="secondary"
+                size="lg"
+                disabled={isUploading}
+                className="w-full font-mono"
+              >
+                RE-RECORD
+              </Button>
+            </>
+          )}
+          
+          <Button onClick={onClose} variant="secondary" size="lg" disabled={isUploading} className="w-full font-mono">
+            CANCEL
           </Button>
         </div>
       </div>

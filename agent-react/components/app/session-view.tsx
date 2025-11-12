@@ -47,16 +47,7 @@ interface FadeProps {
 }
 
 export function Fade({ top = false, bottom = false, className }: FadeProps) {
-  return (
-    <div
-      className={cn(
-        'from-background/80 pointer-events-none h-4 bg-linear-to-b to-transparent',
-        top && 'bg-linear-to-b',
-        bottom && 'bg-linear-to-t',
-        className
-      )}
-    />
-  );
+  return null; // Disabled fade effect to keep gradient visible
 }
 interface SessionViewProps {
   appConfig: AppConfig;

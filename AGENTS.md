@@ -25,6 +25,7 @@ AI-tinkerers-Nov/
 **STT:** Deepgram Nova-3
 **TTS:** Cartesia Sonic-3 (Voice: Jacqueline)
 **Memory:** Mem0 (Semantic memory with RAG)
+**Tools:** MCP (Model Context Protocol) for external tool access
 
 ## 🚀 Starting the Apps
 
@@ -80,6 +81,7 @@ All API keys are stored in `.env.local` files (excluded from Git):
 - `DEEPGRAM_API_KEY` - Deepgram STT access
 - `CARTESIA_API_KEY` - Cartesia TTS and voice cloning access (required in both Python and React .env.local)
 - `MEM0_API_KEY` - Mem0 semantic memory and RAG access
+- `MCP_SERVER_URL` - MCP server endpoint for external tool access (Composio)
 
 ## 🛠️ Common Tasks
 
@@ -120,7 +122,8 @@ Python Agent (agent-python)
     ├── Groq (Kimi K2) - Reasoning
     ├── Deepgram - Speech Recognition
     ├── Cartesia - Voice Synthesis (with optional custom voice)
-    └── Mem0 - Semantic Memory & RAG (stores/retrieves conversation context)
+    ├── Mem0 - Semantic Memory & RAG (stores/retrieves conversation context)
+    └── MCP - External tool access via Model Context Protocol
 ```
 
 ## 🎤 Voice Cloning Feature
@@ -158,6 +161,33 @@ The agent uses Mem0 for semantic memory and RAG (Retrieval Augmented Generation)
 - Natural context injection (agent doesn't explicitly mention memory)
 - Persistent across sessions
 
+## 🎭 Agent Personality & Communication
+
+The agent uses a humanized communication style loaded from `system_prompt.txt`:
+
+**Key Characteristics:**
+- Natural conversational voice (contractions, varied rhythm, fragments)
+- "Everything agent" approach - helps with any task while pushing back when needed
+- Voice-optimized responses (no asterisks, markdown, or formatting)
+- Concise, relevant answers without unnecessary preambles
+- Shows real thinking and emotional connection
+
+**Editing the Personality:**
+Edit `agent-python/system_prompt.txt` to customize the agent's behavior and communication style. Changes take effect after restarting the agent.
+
+## 🔊 Thinking Sound
+
+The agent plays a subtle background audio during tool calls and processing to provide user feedback:
+
+**Implementation:**
+- Uses `BackgroundAudioPlayer` with custom thinking sound
+- Plays automatically when agent is in "thinking" state (tool calls, MCP operations)
+- Custom audio file: `agent-python/thinking-sound.mp3`
+- Volume set to 60% for subtle, non-intrusive feedback
+
+**Customization:**
+Replace `thinking-sound.mp3` with any audio file (MP3, WAV, OGG supported). Changes require agent restart.
+
 ## 🎨 Animated Gradient Background
 
 The React frontend features a WebGL-based animated gradient background (based on GradientGen):
@@ -177,7 +207,9 @@ To change colors, speed, or patterns, edit `gradient-engine.js` and modify the `
 
 ## 📚 Key Files
 
-- `agent-python/agent.py` - Agent logic with MemoryEnabledAgent class, model configuration, and voice cloning
+- `agent-python/agent.py` - Agent logic with MemoryEnabledAgent class, model configuration, voice cloning, and thinking sound
+- `agent-python/system_prompt.txt` - System prompt with voice-optimized, humanized communication style
+- `agent-python/thinking-sound.mp3` - Custom audio played during tool calls and processing
 - `agent-react/app/api/connection-details/route.ts` - Connection token generation with voice ID support
 - `agent-react/app/api/clone-voice/route.ts` - Voice cloning API endpoint
 - `agent-react/components/app/voice-cloning-modal.tsx` - Voice recording and cloning UI
