@@ -22,7 +22,6 @@ AI-tinkerers-Nov/
 **LLM:** Groq - Kimi K2 Instruct (`moonshotai/kimi-k2-instruct`)
 **STT:** Deepgram Nova-3
 **TTS:** Cartesia Sonic-3 (Voice: Jacqueline)
-**Background Audio:** Ambient office sound at 25% volume (calming atmosphere)
 
 ## 🚀 Starting the Apps
 
@@ -123,19 +122,6 @@ Python Agent (agent-python)
 - `agent-react/app/api/connection-details/route.ts` - Connection token generation
 - `agent-react/components/app/app.tsx` - Main UI component
 - `.gitignore` - Protects sensitive files from Git
-
-## 🎵 Audio Features
-
-### Background Audio
-- **Ambient Sound:** Continuous gentle background audio at 25% volume
-- **Creates:** Calming, therapy-like atmosphere
-- **Plays:** On separate track, continues even when user speaks
-- **Note:** Audio ducking (quieting when user speaks) not available yet
-
-To adjust volume, edit `agent.py`:
-```python
-AudioConfig(BuiltinAudioClip.OFFICE_AMBIENCE, volume=0.25)  # 0.0 to 1.0
-```
 
 ## ⚡ Performance Notes
 
