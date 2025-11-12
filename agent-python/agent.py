@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions
+from livekit.agents import AgentSession, Agent, RoomInputOptions, BackgroundAudioPlayer, AudioConfig, BuiltinAudioClip
 from livekit.plugins import groq, deepgram, cartesia, noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
@@ -19,6 +19,14 @@ class Assistant(Agent):
 
 
 async def entrypoint(ctx: agents.JobContext):
+    # Set up background audio player with gentle ambient sound for a calming therapy-like experience
+    background_audio = BackgroundAudioPlayer(
+        ambient_sound=AudioConfig(
+            BuiltinAudioClip.OFFICE_AMBIENCE,
+            volume=0.25  # Very quiet ambient background (25% volume)
+        ),
+    )
+    
     # Set up a voice AI pipeline using Groq Kimi K2, Deepgram STT, and Cartesia TTS
     session = AgentSession(
         # Speech-to-text using Deepgram Nova-3 for high-quality transcription
@@ -57,6 +65,9 @@ async def entrypoint(ctx: agents.JobContext):
             noise_cancellation=noise_cancellation.BVC(),
         ),
     )
+    
+    # Start background audio player (ambient sound begins playing immediately)
+    await background_audio.start(room=ctx.room, agent_session=session)
 
     await session.generate_reply(
         instructions="Greet the user and offer your assistance."
