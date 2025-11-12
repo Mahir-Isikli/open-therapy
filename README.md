@@ -138,50 +138,49 @@ Click "Clone Your Voice" on the welcome screen and record 5-10 seconds of clear 
 - **Voice cloning** - Personalize with your own voice (optional)
 - **Therapeutic background** - Calming animated gradient
 
-## Customization
+## Make It Your Own
 
-### Change the therapeutic style
+The entire system is designed to be customizable:
 
-Edit `agent-python/system_prompt.txt` to adjust the agent's personality and approach.
+**Therapeutic approach**: Edit `agent-python/system_prompt.txt` - change from direct New York style to something gentler, more clinical, or whatever works for you.
 
-### Modify the background
+**Visual experience**: Modify `agent-react/public/gradient/gradient-engine.js` to adjust the background colors, speed, or patterns.
 
-Edit `agent-react/public/gradient/gradient-engine.js` to change colors, speed, or animation patterns.
+**Voice & models**: Edit `agent-python/agent.py` to swap in different LLMs, STT engines, or TTS voices. Want to use OpenAI instead of Groq? Different Deepgram model? Go for it.
 
-### Switch models
+## The Real Cost
 
-Edit `agent-python/agent.py` to use different:
-- LLM models (Groq supports multiple providers)
-- STT models (Deepgram has various options)
-- TTS voices (Cartesia has 100+ voices)
+A 45-minute session costs about **$1** to run:
+- Speech recognition: $0.45
+- Voice synthesis: $0.45  
+- AI inference: $0.05
 
-## Cost Breakdown (Example)
+Traditional therapy? $150-300 for the same time.
 
-For a typical 45-minute therapy session:
-- Deepgram STT: 45 min × $0.01 = **$0.45**
-- Cartesia TTS: 45 min × $0.01 = **$0.45**
-- Groq LLM: 45 min × $0.001 = **$0.05**
+That's not a typo. You can have **150-300 therapy sessions** for the price of one traditional appointment. No insurance battles, no waiting lists, no $50 copays.
 
-**Total: ~$0.95 per session**
+## How It's Built
 
-Compare to traditional therapy at $150-300 per session.
+This runs as two processes: a Python agent handling the AI work and a React frontend for the UI. Everything uses hosted services (LiveKit, Groq, Deepgram, etc.) so you don't need GPUs or local models.
 
-## Architecture Notes
+The agent responds in under a second thanks to Groq's LPU inference, and Mem0 handles semantic memory so it actually remembers what you talked about last week. LiveKit manages the WebRTC connection so the audio just works.
 
-- **Two processes**: Python agent (backend) + React frontend (UI)
-- **Hosted services**: All AI services are cloud-based (no local models)
-- **Real-time**: Sub-second latency with Groq's LPU inference
-- **Memory**: Semantic search with Mem0 for context retrieval
-- **WebRTC**: LiveKit handles all real-time communication
+## Want to Help?
 
-## Contributing
+This project exists to make therapy accessible. Some ways to contribute:
 
-This project is about making therapy accessible. If you improve the system prompt, add features, or reduce costs, please share!
+- **Improve the therapeutic approach** - Better prompts, better responses
+- **Reduce costs** - Find cheaper services or more efficient models
+- **Add features** - Crisis detection, mood tracking, whatever helps
+- **Share knowledge** - Write about what works, what doesn't
 
-## License
+Open an issue or PR if you've got ideas.
 
-MIT - Use it however helps people.
+## License & Disclaimer
 
-## Disclaimer
+MIT License - use this however you want if it helps people.
 
-This is an AI assistant, not a replacement for licensed mental health professionals. If you're in crisis, please contact a human therapist or call a crisis helpline.
+**Important**: This is an AI tool, not a licensed therapist. If you're in crisis or dealing with serious mental health issues, please reach out to a human professional:
+- **988 Suicide & Crisis Lifeline**: Call or text 988 (US)
+- **Crisis Text Line**: Text HOME to 741741 (US)
+- Find a therapist: [Psychology Today Directory](https://www.psychologytoday.com/us/therapists)
