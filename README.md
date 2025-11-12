@@ -135,18 +135,7 @@ Click "Clone Your Voice" on the welcome screen and record 5-10 seconds of clear 
 - **Persistent memory** - Remembers context across sessions
 - **Pattern recognition** - Identifies recurring themes over time
 - **Direct, compassionate approach** - Pushes back on problematic thinking
-- **Voice cloning** - Personalize with your own voice (optional)
-- **Therapeutic background** - Calming animated gradient
-
-## Make It Your Own
-
-The entire system is designed to be customizable:
-
-**Therapeutic approach**: Edit `agent-python/system_prompt.txt` - change from direct New York style to something gentler, more clinical, or whatever works for you.
-
-**Visual experience**: Modify `agent-react/public/gradient/gradient-engine.js` to adjust the background colors, speed, or patterns.
-
-**Voice & models**: Edit `agent-python/agent.py` to swap in different LLMs, STT engines, or TTS voices. Want to use OpenAI instead of Groq? Different Deepgram model? Go for it.
+- **Voice cloning** - Personalize with your own voice
 
 ## The Real Cost
 
@@ -164,23 +153,3 @@ That's not a typo. You can have **150-300 therapy sessions** for the price of on
 This runs as two processes: a Python agent handling the AI work and a React frontend for the UI. Everything uses hosted services (LiveKit, Groq, Deepgram, etc.) so you don't need GPUs or local models.
 
 The agent responds in under a second thanks to Groq's LPU inference, and Mem0 handles semantic memory so it actually remembers what you talked about last week. LiveKit manages the WebRTC connection so the audio just works.
-
-## Want to Help?
-
-This project exists to make therapy accessible. Some ways to contribute:
-
-- **Improve the therapeutic approach** - Better prompts, better responses
-- **Reduce costs** - Find cheaper services or more efficient models
-- **Add features** - Crisis detection, mood tracking, whatever helps
-- **Share knowledge** - Write about what works, what doesn't
-
-Open an issue or PR if you've got ideas.
-
-## License & Disclaimer
-
-MIT License - use this however you want if it helps people.
-
-**Important**: This is an AI tool, not a licensed therapist. If you're in crisis or dealing with serious mental health issues, please reach out to a human professional:
-- **988 Suicide & Crisis Lifeline**: Call or text 988 (US)
-- **Crisis Text Line**: Text HOME to 741741 (US)
-- Find a therapist: [Psychology Today Directory](https://www.psychologytoday.com/us/therapists)
