@@ -120,8 +120,7 @@ export const SessionView = ({
         {appConfig.isPreConnectBufferEnabled && (
           <PreConnectMessage messages={messages} className="pb-4" />
         )}
-        <div className="relative mx-auto max-w-2xl pb-3 md:pb-12 bg-background/80 backdrop-blur-sm rounded-lg">
-          <Fade bottom className="absolute inset-x-0 top-0 h-4 -translate-y-full" />
+        <div className="relative mx-auto max-w-2xl pb-3 md:pb-12">
           <AgentControlBar controls={controls} onChatOpenChange={setChatOpen} />
         </div>
       </MotionBottom>
