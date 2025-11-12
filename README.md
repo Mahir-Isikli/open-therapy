@@ -125,9 +125,9 @@ You'll need API keys for:
 
 5. **Open http://localhost:3000**
 
-### Optional: Clone Your Voice
+### Optional: Clone A Voice
 
-Click "Clone Your Voice" on the welcome screen and record 5-10 seconds of clear audio. The agent will use your voice for all responses, making the experience more personal.
+Click "Clone New Voice" on the welcome screen and record 5-10 seconds of clear audio or Upload an audio file. The agent will use your voice for all responses, making the experience more personal.
 
 ## Features
 
