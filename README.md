@@ -137,17 +137,6 @@ Click "Clone Your Voice" on the welcome screen and record 5-10 seconds of clear 
 - **Direct, compassionate approach** - Pushes back on problematic thinking
 - **Voice cloning** - Personalize with your own voice
 
-## The Real Cost
-
-A 45-minute session costs about **$1** to run:
-- Speech recognition: $0.45
-- Voice synthesis: $0.45  
-- AI inference: $0.05
-
-Traditional therapy? $150-300 for the same time.
-
-That's not a typo. You can have **150-300 therapy sessions** for the price of one traditional appointment. No insurance battles, no waiting lists, no $50 copays.
-
 ## How It's Built
 
 This runs as two processes: a Python agent handling the AI work and a React frontend for the UI. Everything uses hosted services (LiveKit, Groq, Deepgram, etc.) so you don't need GPUs or local models.
