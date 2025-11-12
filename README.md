@@ -123,7 +123,7 @@ You'll need API keys for:
    pnpm dev
    ```
 
-5. **Open http://localhost:3001**
+5. **Open http://localhost:3000**
 
 ### Optional: Clone Your Voice
 
