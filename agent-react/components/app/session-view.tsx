@@ -68,8 +68,8 @@ export const SessionView = ({
     leave: true,
     microphone: true,
     chat: appConfig.supportsChatInput,
-    camera: appConfig.supportsVideoInput,
-    screenShare: appConfig.supportsVideoInput,
+    camera: false, // Disabled - not needed for voice-only therapy
+    screenShare: false, // Disabled - not needed for voice-only therapy
   };
 
   useEffect(() => {

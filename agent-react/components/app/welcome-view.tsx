@@ -23,7 +23,9 @@ interface WelcomeViewProps {
   onStartCall: () => void;
   onOpenVoiceCloning?: () => void;
   onOpenVoiceSelection?: () => void;
+  onOpenSystemPromptModal?: () => void;
   hasCustomVoice?: boolean;
+  activePromptId?: string | null;
 }
 
 export const WelcomeView = ({
@@ -31,7 +33,9 @@ export const WelcomeView = ({
   onStartCall,
   onOpenVoiceCloning,
   onOpenVoiceSelection,
+  onOpenSystemPromptModal,
   hasCustomVoice,
+  activePromptId,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
   return (
@@ -47,28 +51,41 @@ export const WelcomeView = ({
           {startButtonText}
         </Button>
 
-        {onOpenVoiceSelection && (
-          <div className="mt-4 flex flex-col gap-3">
+        <div className="mt-4 flex flex-col gap-3">
+          {onOpenVoiceSelection && (
+            <>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={onOpenVoiceSelection}
+                className="w-64 font-mono"
+              >
+                {hasCustomVoice ? '✓ Select Voice' : 'Select Voice'}
+              </Button>
+              {onOpenVoiceCloning && (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={onOpenVoiceCloning}
+                  className="w-64 font-mono"
+                >
+                  + Clone New Voice
+                </Button>
+              )}
+            </>
+          )}
+          
+          {onOpenSystemPromptModal && (
             <Button
               variant="secondary"
               size="lg"
-              onClick={onOpenVoiceSelection}
+              onClick={onOpenSystemPromptModal}
               className="w-64 font-mono"
             >
-              {hasCustomVoice ? '✓ Select Voice' : 'Select Voice'}
+              {activePromptId ? `Mode: ${activePromptId}` : 'Select Mode'}
             </Button>
-            {onOpenVoiceCloning && (
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={onOpenVoiceCloning}
-                className="w-64 font-mono"
-              >
-                + Clone New Voice
-              </Button>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </section>
     </div>
   );

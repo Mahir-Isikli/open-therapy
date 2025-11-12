@@ -8,6 +8,7 @@ import { SessionView } from '@/components/app/session-view';
 import { WelcomeView } from '@/components/app/welcome-view';
 import { VoiceCloningModal } from '@/components/app/voice-cloning-modal';
 import { VoiceSelectionModal } from '@/components/app/voice-selection-modal';
+import { SystemPromptModal } from '@/components/app/system-prompt-modal';
 
 const MotionWelcomeView = motion.create(WelcomeView);
 const MotionSessionView = motion.create(SessionView);
@@ -36,11 +37,14 @@ export function ViewController() {
   const { appConfig, isSessionActive, startSession } = useSession();
   const [isVoiceCloningModalOpen, setIsVoiceCloningModalOpen] = useState(false);
   const [isVoiceSelectionModalOpen, setIsVoiceSelectionModalOpen] = useState(false);
+  const [isSystemPromptModalOpen, setIsSystemPromptModalOpen] = useState(false);
   const [customVoiceId, setCustomVoiceId] = useState<string | null>(null);
+  const [activePromptId, setActivePromptId] = useState<string | null>(null);
 
-  // Load active voice on mount
+  // Load active voice and system prompt on mount
   useEffect(() => {
     loadActiveVoice();
+    loadActivePrompt();
   }, []);
 
   const loadActiveVoice = async () => {
@@ -55,6 +59,21 @@ export function ViewController() {
       }
     } catch (error) {
       console.error('Failed to load active voice:', error);
+    }
+  };
+
+  const loadActivePrompt = async () => {
+    try {
+      const response = await fetch('/api/system-prompts');
+      if (!response.ok) return;
+      
+      const data = await response.json();
+      const activePrompt = data.prompts?.find((p: any) => p.isActive);
+      if (activePrompt) {
+        setActivePromptId(activePrompt.id);
+      }
+    } catch (error) {
+      console.error('Failed to load active prompt:', error);
     }
   };
 
@@ -77,12 +96,20 @@ export function ViewController() {
     setCustomVoiceId(voiceId);
   };
 
+  const handlePromptSelected = (promptId: string) => {
+    setActivePromptId(promptId);
+  };
+
   const handleStartCall = () => {
     startSession(customVoiceId || undefined);
   };
 
   const handleOpenVoiceSelection = () => {
     setIsVoiceSelectionModalOpen(true);
+  };
+
+  const handleOpenSystemPromptModal = () => {
+    setIsSystemPromptModalOpen(true);
   };
 
   return (
@@ -97,7 +124,9 @@ export function ViewController() {
             onStartCall={handleStartCall}
             onOpenVoiceCloning={() => setIsVoiceCloningModalOpen(true)}
             onOpenVoiceSelection={handleOpenVoiceSelection}
+            onOpenSystemPromptModal={handleOpenSystemPromptModal}
             hasCustomVoice={!!customVoiceId}
+            activePromptId={activePromptId}
           />
         )}
         {/* Session view */}
@@ -127,6 +156,13 @@ export function ViewController() {
           setIsVoiceSelectionModalOpen(false);
           setIsVoiceCloningModalOpen(true);
         }}
+      />
+
+      {/* System Prompt Modal */}
+      <SystemPromptModal
+        isOpen={isSystemPromptModalOpen}
+        onClose={() => setIsSystemPromptModalOpen(false)}
+        onPromptSelected={handlePromptSelected}
       />
     </>
   );

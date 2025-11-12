@@ -158,19 +158,59 @@ The agent uses Mem0 for semantic memory and RAG (Retrieval Augmented Generation)
 - Natural context injection (agent doesn't explicitly mention memory)
 - Persistent across sessions
 
-## 🎭 Agent Personality & Communication
+## 🎭 Agent Personality & System Prompts
 
-The agent uses a humanized communication style loaded from `system_prompt.txt`:
+The agent uses dynamic system prompts managed through `system_prompt_config.json`, similar to voice configuration:
 
-**Key Characteristics:**
-- Natural conversational voice (contractions, varied rhythm, fragments)
-- "Everything agent" approach - helps with any task while pushing back when needed
-- Voice-optimized responses (no asterisks, markdown, or formatting)
-- Concise, relevant answers without unnecessary preambles
-- Shows real thinking and emotional connection
+### Available Modes
 
-**Editing the Personality:**
-Edit `agent-python/system_prompt.txt` to customize the agent's behavior and communication style. Changes take effect after restarting the agent.
+**Therapist (Default):**
+- Supportive therapist who keeps it real and brief
+- Acknowledges emotions then moves to action
+- Natural conversational voice with humanized communication
+- Uses memory naturally without announcing it
+
+**Roleplay:**
+- Practice difficult conversations in a safe environment
+- Agent roleplays as people you're having difficulty with (boss, partner, parent, etc.)
+- Adjustable difficulty levels (easy, realistic, challenging)
+- Can break character for coaching when requested
+
+### Managing System Prompts
+
+**Via UI:**
+1. Click "Select Mode" button on welcome screen
+2. Choose from existing modes, add context, or create new modes
+3. **Quick Context Addition**: Click "+ Context" or "✎ Context" next to any mode to add situation-specific context without editing the base prompt
+4. **Full Editing**: Click "Edit" to modify the entire prompt
+5. Selected mode becomes active immediately
+
+**Layered Context System:**
+Each mode has a **base prompt** (the core instructions) and an optional **context field** that layers on top:
+- **Base**: "You are roleplaying as someone the user is having difficulty with..."
+- **Context**: "You're my best friend John who's been distant lately because of work stress. You tend to get defensive when confronted."
+- **Result**: Agent uses both together, with context adding specific details to the base framework
+
+This lets you reuse powerful base modes (like Roleplay) while customizing them for specific situations.
+
+**Via JSON:**
+Edit `agent-python/system_prompt_config.json` to add/modify modes. Structure:
+```json
+{
+  "prompts": [
+    {
+      "id": "unique-id",
+      "name": "Display Name",
+      "description": "Brief description",
+      "isActive": true,
+      "context": "Optional situation-specific context that layers on top",
+      "content": "Base system prompt..."
+    }
+  ]
+}
+```
+
+Changes take effect after restarting the agent.
 
 ## 🔊 Thinking Sound
 
@@ -204,15 +244,26 @@ To change colors, speed, or patterns, edit `gradient-engine.js` and modify the `
 
 ## 📚 Key Files
 
-- `agent-python/agent.py` - Agent logic with MemoryEnabledAgent class, model configuration, voice cloning, and thinking sound
-- `agent-python/system_prompt.txt` - System prompt with voice-optimized, humanized communication style
+**Backend:**
+- `agent-python/agent.py` - Agent logic with MemoryEnabledAgent class, model configuration, voice cloning, thinking sound, and system prompt loading
+- `agent-python/system_prompt_config.json` - Dynamic system prompts with base + context layering
+- `agent-python/voice_config.json` - Voice configurations for TTS
 - `agent-python/thinking-sound.mp3` - Custom audio played during tool calls and processing
+
+**Frontend:**
 - `agent-react/app/api/connection-details/route.ts` - Connection token generation with voice ID support
 - `agent-react/app/api/clone-voice/route.ts` - Voice cloning API endpoint
+- `agent-react/app/api/system-prompts/route.ts` - System prompt management API
+- `agent-react/app/api/voices/route.ts` - Voice management API
+- `agent-react/components/app/system-prompt-modal.tsx` - System prompt selection and context editing UI
 - `agent-react/components/app/voice-cloning-modal.tsx` - Voice recording and cloning UI
+- `agent-react/components/app/voice-selection-modal.tsx` - Voice selection UI
 - `agent-react/components/app/app.tsx` - Main UI component
 - `agent-react/public/gradient/` - Animated gradient background engine
+
+**Configuration:**
 - `.gitignore` - Protects sensitive files from Git
+- `.env.local` files - API keys (not in Git)
 
 ## ⚡ Performance Notes
 

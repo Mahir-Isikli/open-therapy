@@ -30,15 +30,53 @@ mem0_client = AsyncMemoryClient()
 
 
 def load_system_prompt() -> str:
-    """Load the system prompt from external file."""
+    """Load the system prompt from JSON config file (similar to voice ID loading).
+    Combines base content with optional context for layered prompts."""
     try:
-        prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
-        with open(prompt_path, "r") as f:
-            return f.read().strip()
+        import json
+        
+        config_path = os.path.join(os.path.dirname(__file__), "system_prompt_config.json")
+        with open(config_path, "r") as f:
+            config = json.load(f)
+            
+            # Find active prompt
+            if "prompts" in config and isinstance(config["prompts"], list):
+                active_prompt = next(
+                    (p for p in config["prompts"] if p.get("isActive")), None
+                )
+                if active_prompt:
+                    prompt_name = active_prompt.get("name", "Custom")
+                    base_content = active_prompt["content"]
+                    context = active_prompt.get("context", "").strip()
+                    
+                    # Combine base content with context if provided
+                    if context:
+                        combined_prompt = f"{base_content}\n\n## Additional Context\n\n{context}"
+                        logger.info(f"✓ Using active system prompt: {prompt_name} (with context)")
+                        return combined_prompt
+                    else:
+                        logger.info(f"✓ Using active system prompt: {prompt_name}")
+                        return base_content
+            
+            # Fallback to first prompt if no active one found
+            if config["prompts"]:
+                logger.warning("No active prompt found, using first prompt")
+                return config["prompts"][0]["content"]
+                
     except FileNotFoundError:
-        logger.warning("system_prompt.txt not found, using default prompt")
-        return """You are a helpful voice AI assistant. Your responses are concise and conversational,
-        without any complex formatting, emojis, or special characters."""
+        logger.warning("system_prompt_config.json not found, falling back to system_prompt.txt")
+        try:
+            prompt_path = os.path.join(os.path.dirname(__file__), "system_prompt.txt")
+            with open(prompt_path, "r") as f:
+                return f.read().strip()
+        except FileNotFoundError:
+            logger.warning("system_prompt.txt also not found, using default prompt")
+    except Exception as e:
+        logger.error(f"Failed to load system prompt from config: {e}")
+    
+    # Ultimate fallback
+    return """You are a helpful voice AI assistant. Your responses are concise and conversational,
+    without any complex formatting, emojis, or special characters."""
 
 
 def clone_voice(
@@ -212,6 +250,7 @@ async def entrypoint(ctx: agents.JobContext):
         tts=cartesia.TTS(
             model="sonic-english",
             voice=voice_id,
+            speed=0.8,  # Slightly slower speech (1.0 = default, <1.0 = slower, >1.0 = faster)
         ),
         # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
         # See more at https://docs.livekit.io/agents/build/turns
