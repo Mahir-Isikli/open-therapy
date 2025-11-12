@@ -48,13 +48,42 @@ export async function POST(req: Request) {
 
     const result = await response.json();
 
-    // Write voice ID to config file for Python agent to read
+    // Write voice to config file for Python agent to read
+    // Support multiple voices with active selection
     try {
       const fs = await import('fs/promises');
       const path = await import('path');
       const configPath = path.join(process.cwd(), '..', 'agent-python', 'voice_config.json');
-      await fs.writeFile(configPath, JSON.stringify({ voice_id: result.id }, null, 2));
-      console.log('[VOICE-CLONE] Wrote voice ID to config file:', result.id);
+      
+      // Read existing config or create new structure
+      let config: { voices: Array<{ id: string; name: string; isActive: boolean }> } = { voices: [] };
+      try {
+        const existingConfig = await fs.readFile(configPath, 'utf-8');
+        const parsed = JSON.parse(existingConfig);
+        
+        // Migrate old format to new format
+        if (parsed.voice_id && !parsed.voices) {
+          config.voices = [{ id: parsed.voice_id, name: 'Default Voice', isActive: false }];
+        } else if (parsed.voices) {
+          config = parsed;
+        }
+      } catch (error) {
+        // File doesn't exist or is invalid, use empty structure
+        console.log('[VOICE-CLONE] Creating new config file');
+      }
+      
+      // Deactivate all existing voices
+      config.voices.forEach(voice => voice.isActive = false);
+      
+      // Add new voice and set it as active
+      config.voices.push({
+        id: result.id,
+        name: name,
+        isActive: true
+      });
+      
+      await fs.writeFile(configPath, JSON.stringify(config, null, 2));
+      console.log('[VOICE-CLONE] Added voice to config:', { id: result.id, name });
     } catch (error) {
       console.error('[VOICE-CLONE] Failed to write config file:', error);
     }

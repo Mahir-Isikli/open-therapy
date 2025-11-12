@@ -1,11 +1,18 @@
-from dotenv import load_dotenv
-import os
-import requests
 import logging
+import os
 
+import requests
+from dotenv import load_dotenv
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, ChatMessage, BackgroundAudioPlayer, AudioConfig
-from livekit.plugins import groq, deepgram, cartesia, noise_cancellation, silero
+from livekit.agents import (
+    Agent,
+    AgentSession,
+    ChatContext,
+    ChatMessage,
+    RoomInputOptions,
+    function_tool,
+)
+from livekit.plugins import cartesia, deepgram, groq, noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from mem0 import AsyncMemoryClient
 
@@ -13,8 +20,7 @@ load_dotenv(".env.local")
 
 # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("memory_voice_agent")
 
@@ -31,130 +37,161 @@ def load_system_prompt() -> str:
             return f.read().strip()
     except FileNotFoundError:
         logger.warning("system_prompt.txt not found, using default prompt")
-        return """You are a helpful voice AI assistant. Your responses are concise and conversational, 
+        return """You are a helpful voice AI assistant. Your responses are concise and conversational,
         without any complex formatting, emojis, or special characters."""
 
 
-def clone_voice(audio_file_path: str, name: str, language: str = "en", mode: str = "similarity") -> str:
+def clone_voice(
+    audio_file_path: str, name: str, language: str = "en", mode: str = "similarity"
+) -> str:
     """
     Clone a voice using Cartesia's voice cloning API.
-    
+
     Args:
         audio_file_path: Path to the audio file (3-10 seconds recommended)
         name: Name for the cloned voice
         language: Language code (default: "en")
         mode: "similarity" for close match or "stability" for polished sound
-    
+
     Returns:
         Voice ID string that can be used with Cartesia TTS
     """
     api_key = os.getenv("CARTESIA_API_KEY")
     if not api_key:
         raise ValueError("CARTESIA_API_KEY not found in environment")
-    
+
     with open(audio_file_path, "rb") as audio_file:
         response = requests.post(
             "https://api.cartesia.ai/voices/clone",
-            headers={
-                "X-API-Key": api_key,
-                "Cartesia-Version": "2024-11-13"
-            },
+            headers={"X-API-Key": api_key, "Cartesia-Version": "2024-11-13"},
             files={"clip": audio_file},
             data={
                 "name": name,
                 "description": "User cloned voice",
                 "language": language,
                 "mode": mode,
-                "enhance": "true"
-            }
+                "enhance": "true",
+            },
         )
-    
+
     response.raise_for_status()
     return response.json()["id"]
+
+
+@function_tool()
+async def search_memory(query: str) -> str:
+    """
+    Search past conversation history for relevant context.
+    Use this when the user asks about previous conversations, past topics, or when you need context from earlier sessions.
+
+    Args:
+        query: The search query to find relevant past context
+
+    Returns:
+        Relevant context from past conversations
+    """
+    try:
+        logger.info(f"Tool called: Searching Mem0 for query: {query}")
+        search_results = await mem0_client.search(
+            query=query,
+            filters={"user_id": RAG_USER_ID},
+            version="v2",
+        )
+
+        if search_results and search_results.get("results", []):
+            context_parts = []
+            for result in search_results.get("results", []):
+                paragraph = result.get("memory") or result.get("text")
+                if paragraph:
+                    context_parts.append(paragraph)
+
+            if context_parts:
+                context = "Context from past sessions: " + "; ".join(context_parts)
+                logger.info(f"Memory search returned: {context}")
+                return context
+
+        logger.info("No relevant memories found")
+        return "No relevant past context found."
+    except Exception as e:
+        logger.warning(f"Memory search failed: {e}")
+        return f"Memory search unavailable: {str(e)}"
 
 
 class MemoryEnabledAgent(Agent):
     """
     An agent that can remember past conversations using Mem0 for semantic memory retrieval.
+    Memory search is now tool-based and only called when relevant.
     """
+
     def __init__(self) -> None:
         super().__init__(
             instructions=load_system_prompt(),
+            tools=[search_memory],
         )
-        self._seen_results = set()  # Track previously seen memory result IDs
-        logger.info(f"MemoryEnabledAgent initialized with system prompt from file. Using user_id: {RAG_USER_ID}")
+        logger.info(
+            f"MemoryEnabledAgent initialized with system prompt and memory search tool. Using user_id: {RAG_USER_ID}"
+        )
 
     async def on_enter(self):
         """Called when the agent enters the conversation."""
-        self.session.generate_reply(
-            instructions="Greet the user naturally and ask how they've been doing since last time. If you have specific context from past sessions, reference it casually. Keep it warm but real - you're checking in, not conducting an interview."
-        )
+        self.session.generate_reply(instructions="Say: 'Hey Mahir, how have you been?'")
 
-    async def on_user_turn_completed(self, turn_ctx: ChatContext, new_message: ChatMessage) -> None:
+    async def on_user_turn_completed(
+        self, turn_ctx: ChatContext, new_message: ChatMessage
+    ) -> None:
         """
         Called when the user finishes speaking.
-        Store the user message in Mem0 and retrieve relevant context.
+        Store the user message in Mem0 for future reference.
+        Memory search is now handled via the search_memory tool when needed.
         """
         # Persist the user message in Mem0
         try:
             logger.info(f"Adding user message to Mem0: {new_message.text_content}")
             add_result = await mem0_client.add(
                 [{"role": "user", "content": new_message.text_content}],
-                user_id=RAG_USER_ID
+                user_id=RAG_USER_ID,
             )
             logger.info(f"Mem0 add result (user): {add_result}")
         except Exception as e:
             logger.warning(f"Failed to store user message in Mem0: {e}")
-
-        # RAG: Retrieve relevant context from Mem0 and inject as system message
-        try:
-            logger.info("About to await mem0_client.search for RAG context")
-            search_results = await mem0_client.search(
-                query=new_message.text_content,
-                filters={"user_id": RAG_USER_ID},
-                version="v2"
-            )
-            logger.info(f"mem0_client.search returned: {search_results}")
-            if search_results and search_results.get('results', []):
-                context_parts = []
-                for result in search_results.get('results', []):
-                    paragraph = result.get("memory") or result.get("text")
-                    if paragraph:
-                        context_parts.append(paragraph)
-                
-                if context_parts:
-                    # Inject context as a system message before the user's question
-                    memory_context = "Context from past sessions: " + "; ".join(context_parts)
-                    logger.info(f"Injecting RAG context: {memory_context}")
-                    turn_ctx.add_message(role="system", content=memory_context)
-                    await self.update_chat_ctx(turn_ctx)
-        except Exception as e:
-            logger.warning(f"Failed to inject RAG context from Mem0: {e}")
 
         await super().on_user_turn_completed(turn_ctx, new_message)
 
 
 async def entrypoint(ctx: agents.JobContext):
     import json
-    
+
     # Read voice ID from config file (simple and reliable!)
     voice_id = "9626c31c-bec5-4cca-baa8-f8ba9e84c8bc"  # Default Jacqueline voice
-    
+
     try:
         import os
+
         config_path = os.path.join(os.path.dirname(__file__), "voice_config.json")
         with open(config_path, "r") as f:
             config = json.load(f)
-            if "voice_id" in config and config["voice_id"]:
+
+            # Support new multi-voice structure
+            if "voices" in config and isinstance(config["voices"], list):
+                # Find active voice
+                active_voice = next(
+                    (v for v in config["voices"] if v.get("isActive")), None
+                )
+                if active_voice:
+                    voice_id = active_voice["id"]
+                    voice_name = active_voice.get("name", "Custom Voice")
+                    print(f"✓ Using active voice: {voice_name} ({voice_id})")
+            # Fallback to old format
+            elif "voice_id" in config and config["voice_id"]:
                 voice_id = config["voice_id"]
                 print(f"✓ Using custom voice ID from config file: {voice_id}")
     except FileNotFoundError:
         print(f"No voice config file found, using default voice")
     except Exception as e:
         print(f"Failed to read voice config: {e}, using default voice")
-    
+
     print(f"[FINAL] Voice ID: {voice_id}")
-    
+
     # Set up a voice AI pipeline using Groq Kimi K2, Deepgram STT, and Cartesia TTS
     session = AgentSession(
         # Speech-to-text using Deepgram Nova-3 for high-quality transcription
@@ -163,14 +200,12 @@ async def entrypoint(ctx: agents.JobContext):
             model="nova-3",
             language="en",
         ),
-        
         # Large Language Model using Kimi K2 Instruct through Groq
         # Kimi K2 is optimized for complex reasoning with strong multilingual support
         # See all providers at https://docs.livekit.io/agents/models/llm/
         llm=groq.LLM(
             model="moonshotai/kimi-k2-instruct",
         ),
-        
         # Text-to-speech using Cartesia Sonic-3 with configurable voice
         # Voice can be customized via voice cloning or use default Jacqueline voice
         # See all available models as well as voice selections at https://docs.livekit.io/agents/models/tts/
@@ -178,7 +213,6 @@ async def entrypoint(ctx: agents.JobContext):
             model="sonic-english",
             voice=voice_id,
         ),
-        
         # VAD and turn detection are used to determine when the user is speaking and when the agent should respond
         # See more at https://docs.livekit.io/agents/build/turns
         vad=silero.VAD.load(),
@@ -193,14 +227,6 @@ async def entrypoint(ctx: agents.JobContext):
             noise_cancellation=noise_cancellation.BVC(),
         ),
     )
-    
-    # Set up background audio with thinking sound for tool calls
-    thinking_sound_path = os.path.join(os.path.dirname(__file__), "thinking-sound.mp3")
-    background_audio = BackgroundAudioPlayer(
-        thinking_sound=AudioConfig(thinking_sound_path, volume=0.6),
-    )
-    await background_audio.start(room=ctx.room, agent_session=session)
-    print("✓ Thinking sound enabled for tool calls")
 
 
 if __name__ == "__main__":

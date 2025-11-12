@@ -122,17 +122,23 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-background/95 backdrop-blur-md w-full max-w-lg rounded-2xl p-8 shadow-2xl">
-        <h2 className="text-foreground mb-2 text-2xl font-semibold">Clone Your Voice</h2>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-background/95 backdrop-blur-md w-full max-w-sm rounded-xl p-5 shadow-2xl animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 className="text-foreground mb-2 text-sm font-mono uppercase tracking-wider font-medium">Clone Your Voice</h2>
 
-        <p className="text-muted-foreground mb-8 leading-6">
-          Record 3-10 seconds of clear audio in a quiet environment for best results.
+        <p className="text-muted-foreground mb-4 text-xs font-mono leading-relaxed">
+          Record 3-10 seconds of clear audio in a quiet environment.
         </p>
 
         {/* Voice Name Input */}
-        <div className="mb-6">
-          <label htmlFor="voiceName" className="text-foreground mb-2 block font-medium">
+        <div className="mb-4">
+          <label htmlFor="voiceName" className="text-foreground/70 mb-1.5 block text-xs font-mono uppercase tracking-wider">
             Voice Name
           </label>
           <input
@@ -141,42 +147,43 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
             value={voiceName}
             onChange={(e) => setVoiceName(e.target.value)}
             placeholder="My Custom Voice"
-            className="bg-muted/50 border-input/50 text-foreground placeholder:text-muted-foreground w-full rounded-lg border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary/50"
+            className="bg-muted/50 border-input/50 text-foreground placeholder:text-muted-foreground/50 w-full rounded-lg border px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
             disabled={isUploading}
           />
         </div>
 
         {/* Recording Status */}
-        <div className="mb-6 flex flex-col items-center space-y-4">
+        <div className="mb-4 flex flex-col items-center">
           {isRecording && (
-            <div className="text-foreground text-3xl font-mono font-bold">
+            <div className="text-foreground text-2xl font-mono font-bold animate-pulse">
               {recordingTime}s / 10s
             </div>
           )}
 
           {audioBlob && !isRecording && (
-            <div className="text-foreground flex items-center space-x-2">
-              <span className="text-lg">✓ Recording complete ({recordingTime}s)</span>
+            <div className="text-foreground flex items-center gap-2 text-sm font-mono">
+              <span className="text-primary">✓</span>
+              <span>Recording complete ({recordingTime}s)</span>
             </div>
           )}
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 rounded-lg bg-red-500/10 p-4 text-red-500">{error}</div>
+          <div className="mb-4 rounded-lg bg-red-500/10 p-2 text-red-500 text-xs font-mono">{error}</div>
         )}
 
         {/* Action Buttons */}
-        <div className="flex flex-col space-y-3">
+        <div className="flex flex-col gap-2">
           {!isRecording && !audioBlob && (
-            <Button onClick={startRecording} variant="primary" size="lg" disabled={isUploading} className="w-full font-mono">
-              START RECORDING
+            <Button onClick={startRecording} variant="primary" size="default" disabled={isUploading} className="w-full font-mono text-[11px]">
+              Start Recording
             </Button>
           )}
 
           {isRecording && (
-            <Button onClick={stopRecording} variant="destructive" size="lg" className="w-full font-mono">
-              STOP RECORDING
+            <Button onClick={stopRecording} variant="destructive" size="default" className="w-full font-mono text-[11px]">
+              Stop Recording
             </Button>
           )}
 
@@ -185,26 +192,26 @@ export function VoiceCloningModal({ isOpen, onClose, onVoiceCloned }: VoiceCloni
               <Button
                 onClick={handleUpload}
                 variant="primary"
-                size="lg"
+                size="default"
                 disabled={!voiceName.trim() || isUploading}
-                className="w-full font-mono"
+                className="w-full font-mono text-[11px]"
               >
-                {isUploading ? 'CLONING...' : 'CLONE VOICE'}
+                {isUploading ? 'Cloning...' : 'Clone Voice'}
               </Button>
               <Button
                 onClick={startRecording}
-                variant="secondary"
-                size="lg"
+                variant="outline"
+                size="sm"
                 disabled={isUploading}
-                className="w-full font-mono"
+                className="w-full font-mono text-[10px]"
               >
-                RE-RECORD
+                Re-record
               </Button>
             </>
           )}
           
-          <Button onClick={onClose} variant="secondary" size="lg" disabled={isUploading} className="w-full font-mono">
-            CANCEL
+          <Button onClick={onClose} variant="ghost" size="sm" disabled={isUploading} className="w-full font-mono text-[10px]">
+            Cancel
           </Button>
         </div>
       </div>

@@ -32,9 +32,36 @@ export async function POST(req: Request) {
     // Parse agent configuration from request body
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
-    const voiceId: string | undefined = body?.voice_id;
+    let voiceId: string | undefined = body?.voice_id;
     
-    console.log('[CONNECTION] Received request with voiceId:', voiceId);
+    // If no voice ID provided, try to read active voice from config
+    if (!voiceId) {
+      try {
+        const fs = await import('fs/promises');
+        const path = await import('path');
+        const configPath = path.join(process.cwd(), '..', 'agent-python', 'voice_config.json');
+        const configData = await fs.readFile(configPath, 'utf-8');
+        const config = JSON.parse(configData);
+        
+        // Support new multi-voice structure
+        if (config.voices && Array.isArray(config.voices)) {
+          const activeVoice = config.voices.find((v: any) => v.isActive);
+          if (activeVoice) {
+            voiceId = activeVoice.id;
+            console.log('[CONNECTION] Using active voice from config:', activeVoice.name, voiceId);
+          }
+        }
+        // Fallback to old format
+        else if (config.voice_id) {
+          voiceId = config.voice_id;
+          console.log('[CONNECTION] Using voice from old config format:', voiceId);
+        }
+      } catch (error) {
+        console.log('[CONNECTION] No voice config found, using default voice');
+      }
+    } else {
+      console.log('[CONNECTION] Received request with voiceId:', voiceId);
+    }
 
     // Generate participant token
     const participantName = 'user';
@@ -51,10 +78,10 @@ export async function POST(req: Request) {
     // If we have a voice ID, create the room with metadata first
     if (voiceId) {
       console.log('[CONNECTION] Creating room with voice_id metadata:', voiceId);
+      const { RoomServiceClient } = await import('livekit-server-sdk');
+      const roomService = new RoomServiceClient(LIVEKIT_URL, API_KEY, API_SECRET);
+      
       try {
-        const { RoomServiceClient } = await import('livekit-server-sdk');
-        const roomService = new RoomServiceClient(LIVEKIT_URL, API_KEY, API_SECRET);
-        
         // Create the room with metadata included
         await roomService.createRoom({
           name: roomName,

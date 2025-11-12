@@ -22,6 +22,7 @@ interface WelcomeViewProps {
   startButtonText: string;
   onStartCall: () => void;
   onOpenVoiceCloning?: () => void;
+  onOpenVoiceSelection?: () => void;
   hasCustomVoice?: boolean;
 }
 
@@ -29,6 +30,7 @@ export const WelcomeView = ({
   startButtonText,
   onStartCall,
   onOpenVoiceCloning,
+  onOpenVoiceSelection,
   hasCustomVoice,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
@@ -45,16 +47,26 @@ export const WelcomeView = ({
           {startButtonText}
         </Button>
 
-        {onOpenVoiceCloning && (
-          <div className="mt-6">
+        {onOpenVoiceSelection && (
+          <div className="mt-4 flex flex-col gap-3">
             <Button
               variant="secondary"
               size="lg"
-              onClick={onOpenVoiceCloning}
+              onClick={onOpenVoiceSelection}
               className="w-64 font-mono"
             >
-              {hasCustomVoice ? '✓ Custom Voice Set' : 'Clone Your Voice'}
+              {hasCustomVoice ? '✓ Select Voice' : 'Select Voice'}
             </Button>
+            {onOpenVoiceCloning && (
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={onOpenVoiceCloning}
+                className="w-64 font-mono"
+              >
+                + Clone New Voice
+              </Button>
+            )}
           </div>
         )}
       </section>

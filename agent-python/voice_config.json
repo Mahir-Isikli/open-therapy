@@ -1,3 +1,24 @@
 {
-    "voice_id": "f0a05556-a859-4c42-ad31-639314d3b47e"
+  "voices": [
+    {
+      "id": "f0a05556-a859-4c42-ad31-639314d3b47e",
+      "name": "Mahir",
+      "isActive": false
+    },
+    {
+      "id": "228fca29-3a0a-435c-8728-5cb483251068",
+      "name": "Kiefer",
+      "isActive": false
+    },
+    {
+      "id": "0d2162c2-2fe9-40a7-b3c1-43eab576a64b",
+      "name": "Shelly",
+      "isActive": false
+    },
+    {
+      "id": "21d86464-c153-47b3-ae9f-f9cd60dcc0f4",
+      "name": "Reshma",
+      "isActive": true
+    }
+  ]
 }
