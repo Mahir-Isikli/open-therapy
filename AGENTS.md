@@ -242,6 +242,23 @@ The React frontend features a WebGL-based animated gradient background (based on
 **Customization:**
 To change colors, speed, or patterns, edit `gradient-engine.js` and modify the `shaderParams` object. See the README for preset examples (ocean, sunset, forest, etc.).
 
+## 🔄 Dynamic Welcome Text
+
+The welcome screen features an animated word rotation effect for the agent's role:
+
+**Implementation:**
+- Uses custom `WordRotate` component with smooth vertical transitions
+- Displays "Chat with your [rotating role]"
+- Rotates through: therapist, manager, friend, mom, sister, boyfriend, husband
+- Changes every 2.5 seconds with fade animation
+
+**Files:**
+- `components/ui/word-rotate.tsx` - Reusable word rotation component
+- `components/app/welcome-view.tsx` - Welcome screen implementation
+
+**Customization:**
+To add/remove roles, edit the `words` array in `welcome-view.tsx`. Adjust `duration` prop to change rotation speed.
+
 ## 📚 Key Files
 
 **Backend:**
@@ -258,7 +275,9 @@ To change colors, speed, or patterns, edit `gradient-engine.js` and modify the `
 - `agent-react/components/app/system-prompt-modal.tsx` - System prompt selection and context editing UI
 - `agent-react/components/app/voice-cloning-modal.tsx` - Voice recording and cloning UI
 - `agent-react/components/app/voice-selection-modal.tsx` - Voice selection UI
+- `agent-react/components/app/welcome-view.tsx` - Welcome screen with word rotation
 - `agent-react/components/app/app.tsx` - Main UI component
+- `agent-react/components/ui/word-rotate.tsx` - Animated word rotation component
 - `agent-react/public/gradient/` - Animated gradient background engine
 
 **Configuration:**

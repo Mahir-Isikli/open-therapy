@@ -1,4 +1,5 @@
 import { Button } from '@/components/livekit/button';
+import { WordRotate } from '@/components/ui/word-rotate';
 
 function WelcomeImage() {
   return (
@@ -43,9 +44,23 @@ export const WelcomeView = ({
       <section className="flex flex-col items-center justify-center text-center">
         <WelcomeImage />
 
-        <p className="text-foreground max-w-prose pt-1 leading-6 font-medium">
-          Chat live with your therapist
-        </p>
+        <div className="text-foreground pt-1 leading-6 font-medium flex items-center justify-center gap-1.5 pl-8">
+          <span>Chat with your</span>
+          <div className="inline-flex items-center justify-start w-32">
+            <WordRotate
+              words={[
+                'therapist',
+                'manager',
+                'friend',
+                'mom',
+                'sister',
+                'boyfriend',
+                'husband',
+              ]}
+              duration={2500}
+            />
+          </div>
+        </div>
 
         <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono">
           {startButtonText}
