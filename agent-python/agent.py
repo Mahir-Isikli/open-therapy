@@ -87,7 +87,7 @@ class MemoryEnabledAgent(Agent):
     async def on_enter(self):
         """Called when the agent enters the conversation."""
         self.session.generate_reply(
-            instructions="Greet the user warmly and offer your assistance. If you have context from past conversations, acknowledge it naturally."
+            instructions="Greet the user naturally and ask how they've been doing since last time. If you have specific context from past sessions, reference it casually. Keep it warm but real - you're checking in, not conducting an interview."
         )
 
     async def on_user_turn_completed(self, turn_ctx: ChatContext, new_message: ChatMessage) -> None:
@@ -124,7 +124,7 @@ class MemoryEnabledAgent(Agent):
                 
                 if context_parts:
                     # Inject context as a system message before the user's question
-                    memory_context = "Context from memory: " + "; ".join(context_parts)
+                    memory_context = "Context from past sessions: " + "; ".join(context_parts)
                     logger.info(f"Injecting RAG context: {memory_context}")
                     turn_ctx.add_message(role="system", content=memory_context)
                     await self.update_chat_ctx(turn_ctx)
