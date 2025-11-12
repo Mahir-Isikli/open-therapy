@@ -4,7 +4,7 @@ import requests
 import logging
 
 from livekit import agents
-from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, ChatMessage, mcp, BackgroundAudioPlayer, AudioConfig
+from livekit.agents import AgentSession, Agent, RoomInputOptions, ChatContext, ChatMessage, BackgroundAudioPlayer, AudioConfig
 from livekit.plugins import groq, deepgram, cartesia, noise_cancellation, silero
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 from mem0 import AsyncMemoryClient
@@ -155,15 +155,6 @@ async def entrypoint(ctx: agents.JobContext):
     
     print(f"[FINAL] Voice ID: {voice_id}")
     
-    # Get MCP server URL from environment
-    mcp_server_url = os.getenv("MCP_SERVER_URL")
-    mcp_servers = []
-    if mcp_server_url:
-        print(f"✓ MCP server configured: {mcp_server_url}")
-        mcp_servers = [mcp.MCPServerHTTP(mcp_server_url)]
-    else:
-        print("⚠ No MCP server URL found in environment")
-    
     # Set up a voice AI pipeline using Groq Kimi K2, Deepgram STT, and Cartesia TTS
     session = AgentSession(
         # Speech-to-text using Deepgram Nova-3 for high-quality transcription
@@ -192,9 +183,6 @@ async def entrypoint(ctx: agents.JobContext):
         # See more at https://docs.livekit.io/agents/build/turns
         vad=silero.VAD.load(),
         turn_detection=MultilingualModel(),
-        
-        # MCP servers for external tool access
-        mcp_servers=mcp_servers,
     )
 
     await session.start(

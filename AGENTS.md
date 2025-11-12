@@ -25,7 +25,6 @@ AI-tinkerers-Nov/
 **STT:** Deepgram Nova-3
 **TTS:** Cartesia Sonic-3 (Voice: Jacqueline)
 **Memory:** Mem0 (Semantic memory with RAG)
-**Tools:** MCP (Model Context Protocol) for external tool access
 
 ## 🚀 Starting the Apps
 
@@ -81,7 +80,6 @@ All API keys are stored in `.env.local` files (excluded from Git):
 - `DEEPGRAM_API_KEY` - Deepgram STT access
 - `CARTESIA_API_KEY` - Cartesia TTS and voice cloning access (required in both Python and React .env.local)
 - `MEM0_API_KEY` - Mem0 semantic memory and RAG access
-- `MCP_SERVER_URL` - MCP server endpoint for external tool access (Composio)
 
 ## 🛠️ Common Tasks
 
@@ -122,8 +120,7 @@ Python Agent (agent-python)
     ├── Groq (Kimi K2) - Reasoning
     ├── Deepgram - Speech Recognition
     ├── Cartesia - Voice Synthesis (with optional custom voice)
-    ├── Mem0 - Semantic Memory & RAG (stores/retrieves conversation context)
-    └── MCP - External tool access via Model Context Protocol
+    └── Mem0 - Semantic Memory & RAG (stores/retrieves conversation context)
 ```
 
 ## 🎤 Voice Cloning Feature
@@ -181,7 +178,7 @@ The agent plays a subtle background audio during tool calls and processing to pr
 
 **Implementation:**
 - Uses `BackgroundAudioPlayer` with custom thinking sound
-- Plays automatically when agent is in "thinking" state (tool calls, MCP operations)
+- Plays automatically when agent is in "thinking" state (tool calls)
 - Custom audio file: `agent-python/thinking-sound.mp3`
 - Volume set to 60% for subtle, non-intrusive feedback
 
