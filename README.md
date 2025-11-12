@@ -4,7 +4,7 @@ Making therapy accessible and affordable through AI voice technology.
 
 ## What is this?
 
-Open Therapy is a voice-based AI therapist that costs pennies per session instead of hundreds of dollars. It uses a direct, New York-style therapeutic approach - supportive but real, calling out BS when needed while helping you grow.
+Open Therapy is a voice-based AI therapist and roleplaying agent that costs pennies per session instead of hundreds of dollars.
 
 The agent remembers past conversations, recognizes patterns over time, and has genuine continuity between sessions. It's not trying to replace human therapists, but it makes therapeutic support accessible when you need it.
 
