@@ -40,6 +40,7 @@ export function ViewController() {
   const [isSystemPromptModalOpen, setIsSystemPromptModalOpen] = useState(false);
   const [customVoiceId, setCustomVoiceId] = useState<string | null>(null);
   const [activePromptId, setActivePromptId] = useState<string | null>(null);
+  const [activePromptName, setActivePromptName] = useState<string | null>(null);
 
   // Load active voice and system prompt on mount
   useEffect(() => {
@@ -71,6 +72,7 @@ export function ViewController() {
       const activePrompt = data.prompts?.find((p: any) => p.isActive);
       if (activePrompt) {
         setActivePromptId(activePrompt.id);
+        setActivePromptName(activePrompt.name);
       }
     } catch (error) {
       console.error('Failed to load active prompt:', error);
@@ -96,8 +98,9 @@ export function ViewController() {
     setCustomVoiceId(voiceId);
   };
 
-  const handlePromptSelected = (promptId: string) => {
+  const handlePromptSelected = (promptId: string, promptName: string) => {
     setActivePromptId(promptId);
+    setActivePromptName(promptName);
   };
 
   const handleStartCall = () => {
@@ -126,7 +129,7 @@ export function ViewController() {
             onOpenVoiceSelection={handleOpenVoiceSelection}
             onOpenSystemPromptModal={handleOpenSystemPromptModal}
             hasCustomVoice={!!customVoiceId}
-            activePromptId={activePromptId}
+            activePromptName={activePromptName}
           />
         )}
         {/* Session view */}

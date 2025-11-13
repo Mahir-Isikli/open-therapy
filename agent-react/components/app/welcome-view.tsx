@@ -26,7 +26,7 @@ interface WelcomeViewProps {
   onOpenVoiceSelection?: () => void;
   onOpenSystemPromptModal?: () => void;
   hasCustomVoice?: boolean;
-  activePromptId?: string | null;
+  activePromptName?: string | null;
 }
 
 export const WelcomeView = ({
@@ -36,7 +36,7 @@ export const WelcomeView = ({
   onOpenVoiceSelection,
   onOpenSystemPromptModal,
   hasCustomVoice,
-  activePromptId,
+  activePromptName,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
   return (
@@ -97,7 +97,7 @@ export const WelcomeView = ({
               onClick={onOpenSystemPromptModal}
               className="w-64 font-mono"
             >
-              {activePromptId ? `Mode: ${activePromptId}` : 'Select Mode'}
+              {activePromptName ? `Mode: ${activePromptName}` : 'Select Mode'}
             </Button>
           )}
         </div>

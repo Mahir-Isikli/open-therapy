@@ -1,34 +1,19 @@
 {
   "voices": [
     {
-      "id": "f0a05556-a859-4c42-ad31-639314d3b47e",
-      "name": "Mahir",
-      "isActive": false
-    },
-    {
       "id": "228fca29-3a0a-435c-8728-5cb483251068",
-      "name": "Kiefer",
+      "name": "Christopher",
       "isActive": false
     },
     {
       "id": "0d2162c2-2fe9-40a7-b3c1-43eab576a64b",
-      "name": "Shelly",
+      "name": "Sarah",
+      "isActive": false
+    },
+    {
+      "id": "f7b627c9-b531-4431-8574-28e5627b4e20",
+      "name": "Laura",
       "isActive": true
-    },
-    {
-      "id": "21d86464-c153-47b3-ae9f-f9cd60dcc0f4",
-      "name": "Reshma",
-      "isActive": false
-    },
-    {
-      "id": "42f11203-ed2c-479c-a5ad-6d0399465a56",
-      "name": "Franzi",
-      "isActive": false
-    },
-    {
-      "id": "3ba27bdd-e7e7-4164-af1c-a6d66b88a3a1",
-      "name": "Franci",
-      "isActive": false
     }
   ]
 }

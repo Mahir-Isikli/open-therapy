@@ -15,7 +15,7 @@ interface SystemPrompt {
 interface SystemPromptModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPromptSelected: (promptId: string) => void;
+  onPromptSelected: (promptId: string, promptName: string) => void;
 }
 
 export function SystemPromptModal({
@@ -75,7 +75,12 @@ export function SystemPromptModal({
 
       const data = await response.json();
       setPrompts(data.prompts || []);
-      onPromptSelected(promptId);
+      
+      // Find the prompt to get its name
+      const selectedPrompt = prompts.find(p => p.id === promptId);
+      if (selectedPrompt) {
+        onPromptSelected(promptId, selectedPrompt.name);
+      }
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set active prompt');
